@@ -1,0 +1,40 @@
+---
+title: "R Retrieve Data"
+output: html_document
+---
+```{r, echo=FALSE}
+knitr::opts_chunk$set(error = TRUE)
+```
+
+```{r setup, include=FALSE}
+library(rjson)
+library(dplyr)
+library(RMySQL)
+creds <- fromJSON(file = "rds_cred_MNIST.json")
+```
+
+```{r, echo=FALSE}
+mydb = dbConnect(MySQL(), dbname = creds$database, host = creds$url, port = creds$port, user = creds$user, password = creds$pass)
+
+dbListTables(mydb)
+
+
+strs = dbSendQuery(mydb, "SELECT * from train") # This is where we input the SQL code so change "train" 
+data = fetch(strs, n=-1) # fetches dataset from the server and into a varialble
+#head(data) # View the first 6 rows of the data
+
+write.csv(data, "train.csv") # Writes the data we collected to a csv file
+
+strs = dbSendQuery(mydb, "SELECT * from test") # This is where we input the SQL code so change "test" 
+data = fetch(strs, n=-1) # fetches dataset from the server and into a varialble
+#head(data) # View the first 6 rows of the data
+
+write.csv(data, "test.csv") # Writes the data we collected to a csv file
+
+dbDisconnect(mydb) # Disconnects from the port/server
+```
+
+
+
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
